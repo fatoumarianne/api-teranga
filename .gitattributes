@@ -1,0 +1,6 @@
+# Les scripts executes dans le conteneur Linux doivent garder des fins de
+# ligne UNIX (LF). Sans cette regle, Git les convertirait en CRLF sous
+# Windows et le conteneur refuserait de les lancer.
+* text=auto
+*.sh text eol=lf
+Dockerfile text eol=lf
