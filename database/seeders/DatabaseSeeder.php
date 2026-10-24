@@ -65,6 +65,72 @@ class DatabaseSeeder extends Seeder
 
         // --------------------------------------------------- reservations
 
+        $ressources = $salles->concat($equipements)->values();
+
+        /**
+         * Enregistre une reservation et date la demande quelques jours avant
+         * le creneau (la colonne date_demande vaut « maintenant » par defaut,
+         * ce qui n'aurait pas de sens pour un creneau passe).
+         */
+        $reserver = function ($iMembre, $ressource, $debut, $duree, $statut, $motif = null)
+                use ($membres, $admin) {
+            $reservation = Reservation::create([
+                'id_membre' => $membres[$iMembre % $membres->count()]->id,
+                'id_ressource' => $ressource->id,
+                'id_administrateur' => in_array($statut, [
+                    Reservation::STATUT_VALIDEE, Reservation::STATUT_REFUSEE,
+                ], true) ? $admin->id : null,
+                'date_debut' => $debut,
+                'date_fin' => $debut->copy()->addHours($duree),
+                'statut' => $statut,
+                'motif' => $motif,
+            ]);
+
+            $reservation->date_demande = $debut->copy()->subDays(4)->setTime(9, 30);
+            $reservation->save();
+
+            return $reservation;
+        };
+
+        // --- historique : les six mois precedents
+        //
+        // Le tableau de bord affiche l'evolution des reservations sur les six
+        // derniers mois. Sans historique, le graphique ne montrerait qu'un
+        // seul point. Le nombre de reservations par mois augmente peu a peu,
+        // ce qui traduit l'adoption progressive de l'application par le club.
+        //
+        // [mois en arriere, nombre de reservations ce mois-la]
+        $historique = [[6, 3], [5, 4], [4, 6], [3, 7], [2, 9], [1, 11]];
+
+        $jours = [3, 6, 9, 12, 15, 18, 21, 24, 26, 27, 28];
+        $heures = [9, 10, 15, 16, 17, 18, 19];
+        $durees = [1, 2, 2, 3];
+        $n = 0;
+
+        foreach ($historique as [$recul, $combien]) {
+            $moisDebut = now()->subMonths($recul)->startOfMonth();
+
+            for ($i = 0; $i < $combien; $i++, $n++) {
+                $debut = $moisDebut->copy()
+                    ->addDays($jours[$i % count($jours)] - 1)
+                    ->setTime($heures[$n % count($heures)], 0);
+
+                // une reservation sur sept a ete refusee, une sur onze annulee
+                $statut = Reservation::STATUT_VALIDEE;
+                $motif = null;
+                if ($n % 7 === 3) {
+                    $statut = Reservation::STATUT_REFUSEE;
+                    $motif = 'Ressource déjà occupée sur ce créneau.';
+                } elseif ($n % 11 === 5) {
+                    $statut = Reservation::STATUT_ANNULEE;
+                }
+
+                $reserver($n, $ressources[$n % $ressources->count()], $debut,
+                          $durees[$n % count($durees)], $statut, $motif);
+            }
+        }
+
+        // --- mois en cours : creneaux a venir et demandes a traiter
         $creneaux = [
             // [membre, ressource, jours a partir d'aujourd'hui, heure, duree, statut]
             [0, $salles[0], 2, 18, 2, Reservation::STATUT_VALIDEE],
@@ -78,22 +144,12 @@ class DatabaseSeeder extends Seeder
             [0, $salles[2], -3, 11, 1, Reservation::STATUT_ANNULEE],
         ];
 
-        foreach ($creneaux as [$iMembre, $ressource, $jours, $heure, $duree, $statut]) {
-            $debut = now()->addDays($jours)->setTime($heure, 0);
-
-            Reservation::create([
-                'id_membre' => $membres[$iMembre]->id,
-                'id_ressource' => $ressource->id,
-                'id_administrateur' => in_array($statut, [
-                    Reservation::STATUT_VALIDEE, Reservation::STATUT_REFUSEE,
-                ], true) ? $admin->id : null,
-                'date_debut' => $debut,
-                'date_fin' => $debut->copy()->addHours($duree),
-                'statut' => $statut,
-                'motif' => $statut === Reservation::STATUT_REFUSEE
-                    ? 'Équipement en maintenance sur ce créneau.'
-                    : null,
-            ]);
+        foreach ($creneaux as [$iMembre, $ressource, $decalage, $heure, $duree, $statut]) {
+            $reserver($iMembre, $ressource,
+                      now()->addDays($decalage)->setTime($heure, 0), $duree, $statut,
+                      $statut === Reservation::STATUT_REFUSEE
+                          ? 'Équipement en maintenance sur ce créneau.'
+                          : null);
         }
 
         // -------------------------------------------------- notifications
