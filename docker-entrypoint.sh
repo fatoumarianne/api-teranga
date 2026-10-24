@@ -17,5 +17,8 @@ php artisan migrate --force
 echo "==> Jeu de donnees de demonstration"
 php artisan db:seed --force
 
+echo "==> Mot de passe administrateur"
+php artisan teranga:mot-de-passe-admin
+
 echo "==> Demarrage du serveur sur le port ${PORT:-8000}"
 exec php artisan serve --host 0.0.0.0 --port "${PORT:-8000}"
