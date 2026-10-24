@@ -18,6 +18,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Le seeder est lance a chaque demarrage du serveur en production.
+        // S'il y a deja des utilisateurs, la base a ete remplie une premiere
+        // fois : on s'arrete la, sinon les donnees seraient dupliquees.
+        if (Utilisateur::count() > 0) {
+            $this->command->info('Donnees deja presentes : rien a inserer.');
+
+            return;
+        }
+
         // ------------------------------------------------- utilisateurs
 
         $admin = Utilisateur::create([
