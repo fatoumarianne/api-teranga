@@ -53,20 +53,20 @@ class DatabaseSeeder extends Seeder
         // ---------------------------------------------------- ressources
 
         $salles = collect([
-            ['nom' => 'Salle de basket', 'description' => 'Terrain couvert aux normes, panneaux réglables.', 'capacite' => 40, 'image' => 'salle-basket.svg'],
-            ['nom' => 'Salle de football en salle', 'description' => 'Terrain de futsal avec revêtement synthétique.', 'capacite' => 30, 'image' => 'salle-futsal.svg'],
-            ['nom' => 'Court de tennis n°1', 'description' => 'Court extérieur en terre battue.', 'capacite' => 4, 'image' => 'court-tennis.svg'],
-            ['nom' => 'Salle de musculation', 'description' => 'Équipements de renforcement musculaire.', 'capacite' => 20, 'image' => 'salle-musculation.svg'],
+            ['nom' => 'Salle de basket', 'description' => 'Terrain aux normes, panneaux réglables.', 'capacite' => 40, 'image' => 'salle-basket.webp'],
+            ['nom' => 'Salle de football en salle', 'description' => 'Terrain de futsal avec revêtement synthétique.', 'capacite' => 30, 'image' => 'salle-futsal.webp'],
+            ['nom' => 'Court de tennis n°1', 'description' => 'Court extérieur en résine synthétique.', 'capacite' => 4, 'image' => 'court-tennis.webp'],
+            ['nom' => 'Salle de musculation', 'description' => 'Équipements de renforcement musculaire.', 'capacite' => 20, 'image' => 'salle-musculation.webp'],
         ])->map(fn ($s) => Ressource::create($s + [
             'type' => Ressource::TYPE_SALLE,
             'disponible' => true,
         ]));
 
         $equipements = collect([
-            ['nom' => 'Lot de ballons de basket', 'description' => 'Dix ballons taille 7.', 'quantite' => 10, 'etat' => 'bon', 'image' => 'ballons-basket.svg'],
-            ['nom' => 'Raquettes de tennis', 'description' => 'Huit raquettes adultes.', 'quantite' => 8, 'etat' => 'bon', 'image' => 'raquettes-tennis.svg'],
-            ['nom' => 'Filet de volley-ball', 'description' => 'Filet complet avec poteaux.', 'quantite' => 2, 'etat' => 'moyen', 'image' => 'filet-volley.svg'],
-            ['nom' => 'Tapis de sol', 'description' => 'Tapis pour échauffement et étirements.', 'quantite' => 15, 'etat' => 'bon', 'image' => 'tapis-sol.svg'],
+            ['nom' => 'Lot de ballons de basket', 'description' => 'Dix ballons taille 7.', 'quantite' => 10, 'etat' => 'bon', 'image' => 'ballons-basket.webp'],
+            ['nom' => 'Raquettes de tennis', 'description' => 'Huit raquettes adultes.', 'quantite' => 8, 'etat' => 'bon', 'image' => 'raquettes-tennis.webp'],
+            ['nom' => 'Filet de volley-ball', 'description' => 'Filet complet avec poteaux.', 'quantite' => 2, 'etat' => 'moyen', 'image' => 'filet-volley.webp'],
+            ['nom' => 'Tapis de sol', 'description' => 'Tapis pour échauffement et étirements.', 'quantite' => 15, 'etat' => 'bon', 'image' => 'tapis-sol.webp'],
         ])->map(fn ($e) => Ressource::create($e + [
             'type' => Ressource::TYPE_EQUIPEMENT,
             'disponible' => true,
