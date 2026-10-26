@@ -83,7 +83,13 @@ class AuthController extends Controller
         return new UtilisateurResource($request->user());
     }
 
-    /** Mise a jour du profil par l'utilisateur lui-meme. */
+    /**
+     * Mise a jour du profil par l'utilisateur lui-meme.
+     *
+     * Le changement de mot de passe exige le mot de passe actuel : sans cette
+     * verification, quiconque mettrait la main sur une session ouverte
+     * pourrait s'approprier le compte definitivement.
+     */
     public function majProfil(Request $request): JsonResponse
     {
         $utilisateur = $request->user();
@@ -91,9 +97,29 @@ class AuthController extends Controller
         $donnees = $request->validate([
             'nom' => ['sometimes', 'string', 'max:255'],
             'prenom' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'max:255',
+                        'unique:utilisateur,email,' . $utilisateur->id],
             'telephone' => ['nullable', 'string', 'max:30'],
+            'mot_de_passe_actuel' => ['required_with:mot_de_passe', 'string'],
             'mot_de_passe' => ['sometimes', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+            'mot_de_passe_actuel.required_with' => 'Le mot de passe actuel est obligatoire.',
+            'mot_de_passe.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'mot_de_passe.min' => 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
         ]);
+
+        if (isset($donnees['mot_de_passe'])) {
+            if (! Hash::check($donnees['mot_de_passe_actuel'], $utilisateur->mot_de_passe)) {
+                throw ValidationException::withMessages([
+                    'mot_de_passe_actuel' => ['Le mot de passe actuel est incorrect.'],
+                ]);
+            }
+        }
+
+        // le mot de passe actuel sert seulement a la verification : il n'est
+        // pas une colonne de la table
+        unset($donnees['mot_de_passe_actuel']);
 
         $utilisateur->update($donnees);
 
