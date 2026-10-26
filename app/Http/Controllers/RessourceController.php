@@ -31,6 +31,23 @@ class RessourceController extends Controller
         return RessourceResource::collection($ressources);
     }
 
+    /**
+     * Liste publique, affichee sur la page d'accueil.
+     *
+     * Elle ne demande pas d'authentification : un visiteur doit pouvoir voir
+     * ce que le club propose avant de creer un compte. Seules les ressources
+     * disponibles sont renvoyees.
+     */
+    public function publiques(): AnonymousResourceCollection
+    {
+        return RessourceResource::collection(
+            Ressource::where('disponible', true)
+                ->orderBy('type')
+                ->orderBy('nom')
+                ->get()
+        );
+    }
+
     public function show(Ressource $ressource): RessourceResource
     {
         return new RessourceResource($ressource);
@@ -86,6 +103,7 @@ class RessourceController extends Controller
             'type' => [$requis, Rule::in([Ressource::TYPE_SALLE, Ressource::TYPE_EQUIPEMENT])],
             'nom' => [$requis, 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'string', 'max:500'],
             'disponible' => ['sometimes', 'boolean'],
             'capacite' => ['nullable', 'integer', 'min:1'],
             'quantite' => ['nullable', 'integer', 'min:0'],

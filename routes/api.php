@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/inscription', [AuthController::class, 'inscription']);
 Route::post('/connexion', [AuthController::class, 'connexion']);
 
+// liste des salles et equipements affichee sur la page d'accueil
+Route::get('/ressources-publiques', [RessourceController::class, 'publiques']);
+
 // ------------------------------------------- utilisateur authentifie
 
 Route::middleware('auth:sanctum')->group(function () {

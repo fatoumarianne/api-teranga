@@ -21,6 +21,7 @@ class RessourceResource extends JsonResource
             'type' => $this->type,
             'nom' => $this->nom,
             'description' => $this->description,
+            'image' => $this->image,
             'disponible' => $this->disponible,
 
             $this->mergeWhen($this->type === Ressource::TYPE_SALLE, [

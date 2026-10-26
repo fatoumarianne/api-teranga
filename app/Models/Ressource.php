@@ -22,6 +22,7 @@ class Ressource extends Model
         'type',
         'nom',
         'description',
+        'image',
         'disponible',
         'capacite',
         'quantite',
